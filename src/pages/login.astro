@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Logo from "../components/Logo.astro";
 
 const user = Astro.locals.user;
 if (user) {
@@ -11,30 +12,46 @@ const message = Astro.url.searchParams.get("message");
 ---
 
 <Layout title="Sign In">
-  <div class="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
-    <div class="w-full max-w-[400px]">
-      <div class="mb-8 text-center">
-        <a href="/" class="inline-block text-3xl font-bold text-text-primary">Wellrox Video Review</a>
-        <p class="mt-2 text-sm text-text-secondary">
-          Collaborative video review. Upload, share, get feedback.
+  <div
+    class="relative flex min-h-screen items-center justify-center px-4 py-16"
+    style="background: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);"
+  >
+    <div
+      class="pointer-events-none absolute inset-0 -z-10"
+      style="background: radial-gradient(circle at 80% 10%, rgba(196,184,176,0.18) 0%, transparent 60%);"
+    >
+    </div>
+
+    <div class="w-full max-w-[460px]">
+      <div class="mb-10 text-center">
+        <a href="/" class="inline-flex items-center justify-center">
+          <Logo class="mx-auto h-12 w-auto" />
+        </a>
+        <h1 class="mt-6 font-display text-[34px] font-bold leading-tight tracking-tight text-text-primary">
+          Welcome back
+        </h1>
+        <p class="mt-3 text-[15px] font-light leading-relaxed text-text-secondary">
+          Sign in to review videos with your team.
         </p>
       </div>
 
-      <div class="rounded-2xl border border-border-default bg-bg-secondary p-8">
+      <div
+        class="rounded-[20px] border-[1.5px] border-border-default bg-white p-8 shadow-[0_2px_40px_-12px_rgba(180,145,143,0.18)]"
+      >
         {message && (
-          <div class="mb-4 rounded-lg bg-accent-warning/15 px-4 py-2 text-sm text-accent-warning">
+          <div class="mb-5 rounded-xl border border-accent-warning/30 bg-accent-warning/10 px-4 py-3 text-sm text-accent-warning">
             {message}
           </div>
         )}
         {error && (
-          <div class="mb-4 rounded-lg bg-accent-danger/15 px-4 py-2 text-sm text-accent-danger">
+          <div class="mb-5 rounded-xl border border-accent-danger/30 bg-accent-danger/10 px-4 py-3 text-sm text-accent-danger">
             {error}
           </div>
         )}
 
-        <form method="POST" action="/api/auth/login" class="space-y-4">
+        <form method="POST" action="/api/auth/login" class="space-y-5">
           <div>
-            <label for="email" class="mb-1 block text-sm font-medium text-text-secondary">
+            <label for="email" class="mb-2 block text-sm font-medium text-text-primary">
               Email
             </label>
             <input
@@ -42,12 +59,12 @@ const message = Astro.url.searchParams.get("message");
               id="email"
               name="email"
               required
-              class="w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none"
-              placeholder="you@example.com"
+              class="input-base"
+              placeholder="you@wellrox.com"
             />
           </div>
           <div>
-            <label for="password" class="mb-1 block text-sm font-medium text-text-secondary">
+            <label for="password" class="mb-2 block text-sm font-medium text-text-primary">
               Password
             </label>
             <input
@@ -55,25 +72,30 @@ const message = Astro.url.searchParams.get("message");
               id="password"
               name="password"
               required
-              class="w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none"
+              class="input-base"
               placeholder="Enter your password"
             />
           </div>
           <div class="flex items-center gap-2">
-            <input type="checkbox" id="rememberMe" name="rememberMe" class="accent-accent-primary" />
+            <input
+              type="checkbox"
+              id="rememberMe"
+              name="rememberMe"
+              class="h-4 w-4 accent-accent-primary"
+            />
             <label for="rememberMe" class="text-sm text-text-secondary">Remember me</label>
           </div>
           <button
             type="submit"
-            class="w-full rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover hover:shadow-[0_2px_8px_rgba(108,92,231,0.3)]"
+            class="w-full rounded-full bg-accent-primary px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)]"
           >
             Sign In
           </button>
         </form>
 
-        <p class="mt-6 text-center text-sm text-text-tertiary">
+        <p class="mt-7 text-center text-sm text-text-secondary">
           Don't have an account?{" "}
-          <a href="/register" class="text-accent-primary hover:text-accent-hover">
+          <a href="/register" class="font-medium text-accent-primary hover:text-accent-hover">
             Register
           </a>
         </p>

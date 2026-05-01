@@ -1,12 +1,11 @@
 ---
 interface Props {
   class?: string;
+  variant?: "wordmark" | "mark";
 }
 
-const { class: className = "size-7" } = Astro.props;
+const { class: className = "h-8 w-auto", variant = "wordmark" } = Astro.props;
+const src = variant === "mark" ? "/gray-rocks.png" : "/wellrox-logo.png";
 ---
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" class={className} aria-hidden="true">
-  <rect x="8" y="8" width="112" height="112" rx="24" fill="#6c5ce7" />
-  <polygon points="50,32 50,96 98,64" fill="#f0f0f3" />
-</svg>
+<img src={src} alt="Wellrox" class={className} />

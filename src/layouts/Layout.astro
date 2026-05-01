@@ -29,11 +29,11 @@ const headerSpaceId = selectedSpaceId ?? Astro.url.searchParams.get("space") ?? 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={metaDescription} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/gray-rocks.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
       rel="stylesheet"
     />
     <title>{title} | Wellrox Video Review</title>
@@ -41,10 +41,15 @@ const headerSpaceId = selectedSpaceId ?? Astro.url.searchParams.get("space") ?? 
   <body class="min-h-screen bg-bg-primary font-sans antialiased">
     {
       user && (
-        <header class="sticky top-0 z-50 flex h-14 items-center border-b border-border-default bg-bg-primary px-8">
-          <a href={headerSpaceId ? `/dashboard?space=${headerSpaceId}` : "/dashboard"} class="flex items-center gap-2 text-lg font-bold text-text-primary">
-            <Logo />
-            Wellrox Video Review
+        <header class="sticky top-0 z-50 flex h-16 items-center border-b border-border-default bg-white/95 px-6 backdrop-blur-md sm:px-8">
+          <a
+            href={headerSpaceId ? `/dashboard?space=${headerSpaceId}` : "/dashboard"}
+            class="flex items-center gap-3"
+          >
+            <Logo class="h-8 w-auto" />
+            <span class="hidden font-display text-base italic text-text-secondary sm:inline">
+              Video Review
+            </span>
           </a>
           <div class="ml-auto flex items-center gap-3">
             <SpaceSwitcher client:load spaces={userSpaces} selectedSpaceId={headerSpaceId} />

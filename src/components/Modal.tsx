@@ -39,15 +39,15 @@ export function Modal({
       closeOnEscape={closeOnEscape}
       ariaLabel={ariaLabel}
       ariaLabelledBy={ariaLabelledBy}
-      className="bg-black/85 backdrop-blur-sm"
-      contentClassName={`relative m-4 w-full ${SIZE_CLASS[size]} rounded-2xl border border-border-default bg-bg-secondary p-6 shadow-2xl`}
+      className="bg-[#1a1a1a]/40 backdrop-blur-md"
+      contentClassName={`relative m-4 w-full ${SIZE_CLASS[size]} rounded-[20px] border-[1.5px] border-border-default bg-white p-6 shadow-[0_2px_40px_-12px_rgba(180,145,143,0.25)]`}
     >
         {showCloseButton && (
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg text-text-tertiary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-text-tertiary transition-colors hover:bg-cream hover:text-text-primary"
           >
             <svg
               className="h-4 w-4"

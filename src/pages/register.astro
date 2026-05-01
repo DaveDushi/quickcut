@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Logo from "../components/Logo.astro";
 import { createDb } from "../db";
 import { spaceInvites, spaces } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -39,35 +40,49 @@ if (inviteToken) {
 ---
 
 <Layout title="Create Account">
-  <div class="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
-    <div class="w-full max-w-[400px]">
+  <div
+    class="relative flex min-h-screen items-center justify-center px-4 py-16"
+    style="background: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);"
+  >
+    <div
+      class="pointer-events-none absolute inset-0 -z-10"
+      style="background: radial-gradient(circle at 20% 15%, rgba(196,184,176,0.18) 0%, transparent 60%);"
+    >
+    </div>
+
+    <div class="w-full max-w-[460px]">
       <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-text-primary">Wellrox Video Review</h1>
+        <a href="/" class="inline-flex items-center justify-center">
+          <Logo class="mx-auto h-12 w-auto" />
+        </a>
+        <h1 class="mt-6 font-display text-[34px] font-bold leading-tight tracking-tight text-text-primary">
+          {invite ? "Accept your invite" : "Create your account"}
+        </h1>
         {invite ? (
-          <p class="mt-2 text-sm text-text-secondary">
-            You've been invited to join <span class="font-medium text-text-primary">{invite.spaceName}</span>.
-            Set up your account to accept.
+          <p class="mt-3 text-[15px] font-light leading-relaxed text-text-secondary">
+            You've been invited to join{" "}
+            <span class="font-medium text-text-primary">{invite.spaceName}</span>. Set up your account to accept.
           </p>
         ) : (
-          <p class="mt-2 text-sm text-text-secondary">
-            Create your account with your Wellrox email to start reviewing videos.
+          <p class="mt-3 text-[15px] font-light leading-relaxed text-text-secondary">
+            Sign up with your Wellrox email to start reviewing videos.
           </p>
         )}
       </div>
 
-      <div class="rounded-2xl border border-border-default bg-bg-secondary p-8">
+      <div
+        class="rounded-[20px] border-[1.5px] border-border-default bg-white p-8 shadow-[0_2px_40px_-12px_rgba(180,145,143,0.18)]"
+      >
         {error && (
-          <div class="mb-4 rounded-lg bg-accent-danger/15 px-4 py-2 text-sm text-accent-danger">
+          <div class="mb-5 rounded-xl border border-accent-danger/30 bg-accent-danger/10 px-4 py-3 text-sm text-accent-danger">
             {error}
           </div>
         )}
 
-        <form method="POST" action="/api/auth/register" class="space-y-4">
-          {inviteToken && (
-            <input type="hidden" name="inviteToken" value={inviteToken} />
-          )}
+        <form method="POST" action="/api/auth/register" class="space-y-5">
+          {inviteToken && <input type="hidden" name="inviteToken" value={inviteToken} />}
           <div>
-            <label for="displayName" class="mb-1 block text-sm font-medium text-text-secondary">
+            <label for="displayName" class="mb-2 block text-sm font-medium text-text-primary">
               Display Name
             </label>
             <input
@@ -75,12 +90,12 @@ if (inviteToken) {
               id="displayName"
               name="displayName"
               required
-              class="w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none"
+              class="input-base"
               placeholder="First and last name"
             />
           </div>
           <div>
-            <label for="email" class="mb-1 block text-sm font-medium text-text-secondary">
+            <label for="email" class="mb-2 block text-sm font-medium text-text-primary">
               Email
             </label>
             <input
@@ -90,17 +105,17 @@ if (inviteToken) {
               required
               readonly={invite !== null}
               value={invite?.email ?? ""}
-              class={`w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none ${invite ? "cursor-not-allowed opacity-70" : ""}`}
+              class="input-base"
               placeholder="you@wellrox.com"
             />
             {!invite && (
-              <p class="mt-1 text-xs text-text-tertiary">
+              <p class="mt-2 text-xs text-text-tertiary">
                 Wellrox Video Review is limited to wellrox.com email addresses. External collaborators must use an invite link.
               </p>
             )}
           </div>
           <div>
-            <label for="password" class="mb-1 block text-sm font-medium text-text-secondary">
+            <label for="password" class="mb-2 block text-sm font-medium text-text-primary">
               Password
             </label>
             <input
@@ -109,12 +124,12 @@ if (inviteToken) {
               name="password"
               required
               minlength="8"
-              class="w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none"
+              class="input-base"
               placeholder="At least 8 characters"
             />
           </div>
           <div>
-            <label for="confirmPassword" class="mb-1 block text-sm font-medium text-text-secondary">
+            <label for="confirmPassword" class="mb-2 block text-sm font-medium text-text-primary">
               Confirm Password
             </label>
             <input
@@ -123,21 +138,21 @@ if (inviteToken) {
               name="confirmPassword"
               required
               minlength="8"
-              class="w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none"
+              class="input-base"
               placeholder="Confirm your password"
             />
           </div>
           <button
             type="submit"
-            class="w-full rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover hover:shadow-[0_2px_8px_rgba(108,92,231,0.3)]"
+            class="w-full rounded-full bg-accent-primary px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)]"
           >
             {invite ? "Accept Invite & Create Account" : "Create Account"}
           </button>
         </form>
 
-        <p class="mt-6 text-center text-sm text-text-tertiary">
+        <p class="mt-7 text-center text-sm text-text-secondary">
           Already have an account?{" "}
-          <a href="/login" class="text-accent-primary hover:text-accent-hover">
+          <a href="/login" class="font-medium text-accent-primary hover:text-accent-hover">
             Sign In
           </a>
         </p>

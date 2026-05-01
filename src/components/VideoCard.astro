@@ -91,9 +91,9 @@ function formatDate(dateStr: string): string {
 }
 ---
 
-<div class="group relative overflow-hidden rounded-xl border border-border-default bg-bg-secondary transition-all duration-200 hover:scale-[1.02] hover:border-border-hover hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
+<div class="group relative overflow-hidden rounded-[20px] border-[1.5px] border-border-default bg-white transition-all duration-[250ms] hover:-translate-y-1 hover:border-primary-light hover:shadow-[0_12px_40px_-8px_rgba(180,145,143,0.2)]">
   <a href={spaceId ? `/videos/${id}?space=${spaceId}` : `/videos/${id}`} class="block">
-    <div class="relative aspect-video bg-bg-tertiary">
+    <div class="relative aspect-video bg-cream-dark">
       {thumbnailUrl ? (
         <img src={thumbnailUrl} alt={title} class="h-full w-full object-cover" />
       ) : (

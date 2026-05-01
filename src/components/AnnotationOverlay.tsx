@@ -23,8 +23,8 @@ interface AnnotationOverlayProps {
 /** How close (in seconds) a comment's timestamp must be to show its annotation. */
 const DEFAULT_TIME_TOLERANCE = 0.5;
 
-const ANNOTATION_COLOR = "#E74A3C";
-const ANNOTATION_COLOR_RESOLVED = "#22C55E";
+const ANNOTATION_COLOR = "#e53e3e";
+const ANNOTATION_COLOR_RESOLVED = "#38a169";
 
 export function AnnotationOverlay({
   comments,

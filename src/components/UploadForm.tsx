@@ -304,7 +304,7 @@ export function UploadForm({ folderId = null, spaces, selectedSpaceId, transcrip
           <button
             onClick={handleUpload}
             disabled={state === "uploading" || !title.trim()}
-            className="w-full rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover hover:shadow-[0_2px_8px_rgba(108,92,231,0.3)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-full bg-accent-primary px-6 py-3 text-sm font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
             {state === "uploading" ? "Uploading..." : "Upload Video"}
           </button>

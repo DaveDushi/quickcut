@@ -3,16 +3,19 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Not Found">
-  <div class="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
+  <div
+    class="flex min-h-screen items-center justify-center px-4"
+    style="background: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);"
+  >
     <div class="text-center">
-      <p class="text-6xl font-bold text-text-tertiary">404</p>
-      <h1 class="mt-4 text-2xl font-bold text-text-primary">Page Not Found</h1>
-      <p class="mt-2 text-sm text-text-secondary">
+      <p class="font-display text-[120px] font-bold leading-none text-accent-primary/40">404</p>
+      <h1 class="mt-2 font-display text-[34px] font-bold tracking-tight text-text-primary">Page Not Found</h1>
+      <p class="mt-3 text-[15px] font-light text-text-secondary">
         The page you're looking for doesn't exist.
       </p>
       <a
         href="/"
-        class="mt-6 inline-block rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover hover:shadow-[0_2px_8px_rgba(108,92,231,0.3)]"
+        class="mt-8 inline-flex items-center justify-center rounded-full bg-accent-primary px-8 py-3 text-sm font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)]"
       >
         Go Home
       </a>

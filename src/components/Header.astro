@@ -1,5 +1,6 @@
 ---
 import { UserMenu } from "./UserMenu";
+import Logo from "./Logo.astro";
 
 interface Props {
   user?: { id: string; email: string; displayName: string } | null;
@@ -9,13 +10,16 @@ interface Props {
 const { user, backLink } = Astro.props;
 ---
 
-<header class="sticky top-0 z-50 flex h-14 items-center border-b border-border-default bg-bg-primary px-8">
-  <a href="/dashboard" class="text-lg font-bold text-text-primary">
-    Wellrox Video Review
+<header
+  class="sticky top-0 z-50 flex h-16 items-center border-b border-border-default bg-white/95 px-6 backdrop-blur-md sm:px-8"
+>
+  <a href="/dashboard" class="flex items-center gap-3">
+    <Logo class="h-8 w-auto" />
+    <span class="hidden font-display text-base italic text-text-secondary sm:inline">Video Review</span>
   </a>
 
   {backLink && (
-    <a href={backLink.href} class="ml-6 text-sm text-text-tertiary transition-colors hover:text-text-primary">
+    <a href={backLink.href} class="ml-6 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">
       {backLink.label}
     </a>
   )}
