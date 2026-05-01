@@ -6,13 +6,58 @@ const user = Astro.locals.user;
 if (user) {
   return Astro.redirect("/dashboard");
 }
+
+const quickActions = [
+  {
+    code: "01",
+    title: "Upload a cut",
+    hint: "Drag in MP4/MOV up to 5GB. Resumable.",
+    href: "/upload",
+    icon: "upload",
+  },
+  {
+    code: "02",
+    title: "Browse your spaces",
+    hint: "Jump back into the team or client space.",
+    href: "/dashboard",
+    icon: "spaces",
+  },
+  {
+    code: "03",
+    title: "Check pending invites",
+    hint: "Accept invites someone sent you.",
+    href: "/notifications",
+    icon: "bell",
+  },
+  {
+    code: "04",
+    title: "Send a client a share link",
+    hint: "Open a video → Share. No account needed.",
+    href: "/dashboard",
+    icon: "link",
+  },
+  {
+    code: "05",
+    title: "Invite a teammate",
+    hint: "Open a space → Settings → Members.",
+    href: "/dashboard",
+    icon: "people",
+  },
+  {
+    code: "06",
+    title: "Set required approvals",
+    hint: "Open space settings → Approvals.",
+    href: "/dashboard",
+    icon: "check",
+  },
+];
 ---
 
 <Layout
-  title="Collaborative Video Review"
-  description="Wellrox Video Review is collaborative video review built on Cloudflare. Team spaces, member invites, version stacks, timestamped comments, share links for clients, resumable 5GB uploads, and global HLS playback."
+  title="Wellrox Video Review"
+  description="Internal video review for Wellrox teams. Upload cuts, leave timestamped notes, ship the edit."
 >
-  <!-- Marketing nav -->
+  <!-- Launchpad nav -->
   <header
     id="marketing-nav"
     class="fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,box-shadow,border-color] duration-300"
@@ -20,25 +65,29 @@ if (user) {
     <div class="mx-auto flex h-[76px] max-w-[1200px] items-center px-6 sm:px-8">
       <a href="/" class="flex items-center gap-3">
         <Logo class="h-9 w-auto sm:h-10" />
-        <span class="hidden font-display text-base italic text-text-secondary sm:inline">
-          Video Review
+        <span
+          class="hidden items-center gap-2 sm:flex"
+        >
+          <span class="font-display text-base italic text-text-secondary">Video Review</span>
+          <span
+            class="rounded-full border border-border-default px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-text-tertiary"
+          >
+            Internal
+          </span>
         </span>
       </a>
-      <nav class="ml-12 hidden items-center gap-8 md:flex">
-        <a href="#features" class="text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">Features</a>
-        <a href="#workflow" class="text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">Workflow</a>
-        <a href="#stack" class="text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">Stack</a>
-        <a href="#faq" class="text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">FAQ</a>
-      </nav>
-      <div class="ml-auto flex items-center gap-4">
-        <a href="/login" class="hidden text-sm font-medium text-text-secondary transition-colors hover:text-text-primary sm:inline">
+      <div class="ml-auto flex items-center gap-3 sm:gap-4">
+        <a
+          href="/login"
+          class="text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+        >
           Sign in
         </a>
         <a
           href="/register"
-          class="inline-flex items-center justify-center rounded-full bg-accent-primary px-7 py-2.5 text-sm font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)]"
+          class="inline-flex items-center justify-center rounded-full bg-accent-primary px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)] sm:px-7"
         >
-          Get Started
+          Create account
         </a>
       </div>
     </div>
@@ -88,36 +137,48 @@ if (user) {
     }
 
     .stacked-rocks {
-      opacity: 0.07;
+      opacity: 0.06;
       mix-blend-mode: multiply;
     }
 
     @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .reveal {
-      animation: fadeUp 0.7s ease-out backwards;
+    .reveal { animation: fadeUp 0.7s ease-out backwards; }
+
+    @keyframes recPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
     }
+    .rec-dot { animation: recPulse 1.6s ease-in-out infinite; }
 
     @media (prefers-reduced-motion: reduce) {
-      .reveal {
+      .reveal, .rec-dot {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
       }
     }
+
+    .grain-card {
+      position: relative;
+    }
+    .grain-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(180, 145, 143, 0.06) 1px, transparent 1px);
+      background-size: 14px 14px;
+      opacity: 0.5;
+      mix-blend-mode: multiply;
+    }
   </style>
 
   <!-- Hero -->
   <section class="hero-bg relative overflow-hidden pt-[76px]">
-    <!-- Stacked rocks decorative motif -->
     <img
       src="/gray-rocks.png"
       alt=""
@@ -125,59 +186,137 @@ if (user) {
       class="stacked-rocks pointer-events-none absolute right-[-60px] top-32 -z-10 hidden h-[420px] w-auto md:block lg:right-12 lg:h-[520px]"
     />
 
-    <div class="relative mx-auto max-w-[1200px] px-6 pt-20 pb-28 sm:px-8 sm:pt-28 sm:pb-32">
+    <div class="relative mx-auto max-w-[1200px] px-6 pt-16 pb-24 sm:px-8 sm:pt-24 sm:pb-28">
       <div class="mx-auto max-w-[820px] text-center">
         <div
-          class="reveal mb-7 inline-flex items-center gap-2.5 rounded-full border-[1.5px] px-5 py-2 text-[13px] font-semibold uppercase tracking-[0.08em]"
-          style="background: rgba(180,145,143,0.12); border-color: rgba(180,145,143,0.18); color: #9a7573;"
+          class="reveal mb-7 inline-flex items-center gap-2.5 rounded-full border-[1.5px] px-4 py-1.5 font-mono text-[12px] font-semibold uppercase tracking-[0.12em]"
+          style="background: rgba(229,62,62,0.06); border-color: rgba(229,62,62,0.18); color: #c44848;"
         >
-          <span class="size-1.5 rounded-full bg-accent-primary"></span>
-          Team spaces for collaborative review
+          <span class="rec-dot inline-flex size-2 rounded-full bg-accent-danger"></span>
+          REC · 00:00 · Internal
         </div>
         <h1
           class="reveal font-display text-[44px] font-bold leading-[1.06] tracking-[-0.025em] text-text-primary sm:text-[64px] lg:text-[72px]"
           style="animation-delay: 0.1s;"
         >
-          Review video together.
-          <span class="block italic text-accent-primary">Frame by frame.</span>
+          The Wellrox
+          <span class="block italic text-accent-primary">cutting room.</span>
         </h1>
         <p
           class="reveal mx-auto mt-7 max-w-2xl text-[17px] font-light leading-[1.7] text-text-secondary sm:text-[20px]"
           style="animation-delay: 0.2s;"
         >
-          Create spaces for each team or client, invite collaborators, upload up to 5GB, stack new cuts as
-          versions, and collect timestamped feedback — no account required for external reviewers.
+          Upload cuts, leave timestamped notes, ship the edit. An in-house review tool for the Wellrox team.
         </p>
         <div class="reveal mt-11 flex flex-wrap items-center justify-center gap-4" style="animation-delay: 0.3s;">
           <a
-            href="/register"
+            href="/login"
             class="inline-flex items-center justify-center rounded-full bg-accent-primary px-12 py-[18px] text-[17px] font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)]"
           >
-            Get Started Free
+            Sign in
           </a>
           <a
-            href="/login"
+            href="/register"
             class="inline-flex items-center justify-center rounded-full border-[1.5px] border-border-default bg-white px-10 py-[18px] text-[17px] font-semibold text-text-primary transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-light hover:bg-cream-subtle"
           >
-            Sign In
+            Wellrox staff? Create account
           </a>
         </div>
+        <details
+          id="invite-paste"
+          class="reveal mt-6 inline-block text-left"
+          style="animation-delay: 0.35s;"
+        >
+          <summary
+            class="invite-summary inline-flex cursor-pointer list-none items-center gap-2 rounded-full border-[1.5px] border-border-default bg-white/70 px-5 py-2 text-[13px] font-medium text-text-secondary transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-light hover:bg-white hover:text-text-primary"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-3.5 text-accent-primary" aria-hidden="true">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <span>Got an invite link? Open it</span>
+            <span class="invite-chevron font-mono text-text-tertiary transition-transform duration-200" aria-hidden="true">›</span>
+          </summary>
+          <form
+            id="invite-form"
+            class="mt-3 flex flex-col items-stretch gap-2 rounded-2xl border-[1.5px] border-border-default bg-white p-2 shadow-[0_8px_28px_-12px_rgba(180,145,143,0.25)] sm:flex-row sm:items-center"
+          >
+            <label for="invite-input" class="sr-only">Invite link or token</label>
+            <input
+              id="invite-input"
+              type="text"
+              required
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste invite link or token"
+              class="min-w-0 flex-1 rounded-xl border border-transparent bg-cream-subtle px-4 py-2.5 font-mono text-[13px] text-text-primary placeholder:text-text-tertiary focus:border-primary-light focus:bg-white focus:outline-none"
+            />
+            <button
+              type="submit"
+              class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-accent-primary px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:bg-accent-hover"
+            >
+              Open invite
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" class="size-3.5" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </form>
+          <p id="invite-error" class="mt-2 hidden font-mono text-[11px] text-accent-danger" role="alert"></p>
+        </details>
+
+        <script is:inline>
+          (function () {
+            const details = document.getElementById("invite-paste");
+            const form = document.getElementById("invite-form");
+            const input = document.getElementById("invite-input");
+            const error = document.getElementById("invite-error");
+            const chevron = details && details.querySelector(".invite-chevron");
+            if (!details || !form || !input || !error) return;
+
+            details.addEventListener("toggle", () => {
+              if (chevron) chevron.style.transform = details.open ? "rotate(90deg)" : "rotate(0deg)";
+              if (details.open) setTimeout(() => input.focus(), 50);
+              else { error.classList.add("hidden"); error.textContent = ""; }
+            });
+
+            const showError = (msg) => { error.textContent = msg; error.classList.remove("hidden"); };
+
+            form.addEventListener("submit", (e) => {
+              e.preventDefault();
+              const raw = input.value.trim();
+              if (!raw) return;
+              let token = raw;
+              const match = raw.match(/\/invites\/([A-Za-z0-9_-]+)/);
+              if (match) token = match[1];
+              else if (/^https?:\/\//i.test(raw)) {
+                showError("That doesn't look like an invite link.");
+                return;
+              }
+              if (!/^[A-Za-z0-9_-]+$/.test(token)) {
+                showError("Invite token can only contain letters, numbers, - and _.");
+                return;
+              }
+              window.location.href = "/invites/" + encodeURIComponent(token);
+            });
+          })();
+        </script>
 
         <div
-          class="reveal mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[13px] font-medium text-text-secondary"
+          class="reveal mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-mono text-[12px] text-text-tertiary"
           style="animation-delay: 0.4s;"
         >
           <span class="inline-flex items-center gap-2">
             <span class="size-1.5 rounded-full bg-accent-secondary"></span>
-            Free to start
-          </span>
-          <span class="inline-flex items-center gap-2">
-            <span class="size-1.5 rounded-full bg-accent-primary"></span>
             5GB resumable uploads
           </span>
           <span class="inline-flex items-center gap-2">
+            <span class="size-1.5 rounded-full bg-accent-primary"></span>
+            Timestamped comments
+          </span>
+          <span class="inline-flex items-center gap-2">
             <span class="size-1.5 rounded-full bg-taupe"></span>
-            Built on Cloudflare
+            Version stacks per video
           </span>
         </div>
       </div>
@@ -196,16 +335,16 @@ if (user) {
             </div>
             <div class="flex items-center gap-2">
               <span
-                class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em]"
+                class="rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"
                 style="background: rgba(180,145,143,0.12); color: #9a7573;"
               >
-                Acme Launch Space
+                Wellrox · Spring Drop
               </span>
               <span
-                class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em]"
+                class="hidden rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] sm:inline"
                 style="background: rgba(56,161,105,0.1); color: #38a169;"
               >
-                Approved
+                v3 · 2/3 approved
               </span>
             </div>
           </div>
@@ -215,8 +354,7 @@ if (user) {
             <div
               class="absolute inset-0"
               style="background: radial-gradient(circle at 30% 40%, rgba(180,145,143,0.18), transparent 55%), radial-gradient(circle at 70% 60%, rgba(196,184,176,0.2), transparent 55%);"
-            >
-            </div>
+            ></div>
             <!-- Play button -->
             <div class="absolute inset-0 flex items-center justify-center">
               <div
@@ -228,6 +366,13 @@ if (user) {
               </div>
             </div>
 
+            <!-- Timecode overlay -->
+            <div
+              class="absolute bottom-4 left-4 rounded-md bg-black/55 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wider text-white/95"
+            >
+              00:42 / 02:34
+            </div>
+
             <!-- Floating comment card -->
             <div
               class="absolute top-6 right-6 max-w-[280px] rounded-[16px] border-[1.5px] border-border-default bg-white/95 p-3.5 shadow-[0_12px_32px_rgba(180,145,143,0.2)] backdrop-blur-sm"
@@ -236,15 +381,15 @@ if (user) {
                 <div
                   class="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-semibold text-white"
                 >
-                  JQ
+                  MK
                 </div>
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold text-text-primary">James</span>
-                    <span class="font-mono text-[11px] font-medium text-accent-primary">0:12</span>
+                    <span class="text-xs font-semibold text-text-primary">Maya</span>
+                    <span class="font-mono text-[11px] font-medium text-accent-primary">0:42</span>
                   </div>
                   <p class="mt-1 text-xs leading-relaxed text-text-secondary">
-                    Can we tighten the cut here? Feels a beat too long.
+                    Tighten this beat — drop the breath before the cut.
                   </p>
                 </div>
               </div>
@@ -273,8 +418,8 @@ if (user) {
               ></span>
             </div>
             <div class="mt-2 flex justify-between font-mono text-[11px] text-text-tertiary">
-              <span>0:00</span>
-              <span>2:34</span>
+              <span>00:00</span>
+              <span>02:34</span>
             </div>
           </div>
         </div>
@@ -282,177 +427,154 @@ if (user) {
     </div>
   </section>
 
-  <!-- Features -->
-  <section id="features" class="relative bg-white">
+  <!-- Quick actions -->
+  <section id="actions" class="relative bg-white">
     <div class="mx-auto max-w-[1200px] px-6 py-24 sm:px-8 sm:py-28">
       <div class="mx-auto max-w-2xl text-center">
         <div
-          class="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.15em] text-accent-primary"
+          class="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-accent-primary"
           style="background: rgba(180,145,143,0.1);"
         >
-          Features
+          // jump in
         </div>
         <h2 class="font-display text-[32px] font-bold leading-[1.15] tracking-tight text-text-primary sm:text-[44px]">
-          Everything you need to ship video, faster
+          Skip the menu. Pick a verb.
         </h2>
         <p class="mt-5 text-[17px] font-light leading-[1.7] text-text-secondary">
-          A focused review workflow without the bloat. Drop in, leave feedback, get out.
+          Six things you'll actually do here. Sign in first — then come back, or just bookmark the action you reach for the most.
         </p>
       </div>
 
-      <div class="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- Feature 1 -->
-        <div class="brand-card p-8">
-          <div
-            class="mb-5 flex size-14 items-center justify-center rounded-2xl text-accent-primary"
-            style="background: rgba(180,145,143,0.1);"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <path d="M12 12V3"></path>
-              <path d="M7 8l5-5 5 5"></path>
-            </svg>
-          </div>
-          <h3 class="text-[20px] font-semibold text-text-primary">Resumable 5GB uploads</h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Drag, drop, walk away. TUS-resumable uploads keep going across reconnects so you never lose progress.
-          </p>
-        </div>
-
-        <!-- Feature 2 -->
-        <div class="brand-card p-8">
-          <div
-            class="mb-5 flex size-14 items-center justify-center rounded-2xl text-accent-primary"
-            style="background: rgba(180,145,143,0.1);"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-          </div>
-          <h3 class="text-[20px] font-semibold text-text-primary">Timestamped comments</h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Pin feedback to the exact frame. No more "around the 30 second mark…" — reviewers click and comment.
-          </p>
-        </div>
-
-        <!-- Feature 3 -->
-        <div class="brand-card p-8">
-          <div
-            class="mb-5 flex size-14 items-center justify-center rounded-2xl text-accent-primary"
-            style="background: rgba(180,145,143,0.1);"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-              <path d="M17 8h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"></path>
-              <polyline points="9 12 11 14 15 10"></polyline>
-              <path d="M9 4h6v4H9z"></path>
-            </svg>
-          </div>
-          <h3 class="text-[20px] font-semibold text-text-primary">Version stacking</h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Upload new cuts into an ordered stack. Switch versions without mixing comments between edits.
-          </p>
-        </div>
-
-        <!-- Feature 4 -->
-        <div class="brand-card p-8">
-          <div
-            class="mb-5 flex size-14 items-center justify-center rounded-2xl text-accent-primary"
-            style="background: rgba(180,145,143,0.1);"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-          </div>
-          <h3 class="text-[20px] font-semibold text-text-primary">Team spaces</h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Separate every client, channel, or project into its own space with members, invites, and settings.
-          </p>
-        </div>
-
-        <!-- Feature 5 -->
-        <div class="brand-card p-8">
-          <div
-            class="mb-5 flex size-14 items-center justify-center rounded-2xl text-accent-primary"
-            style="background: rgba(180,145,143,0.1);"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </svg>
-          </div>
-          <h3 class="text-[20px] font-semibold text-text-primary">Public share links</h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Send a link to a client. They review and comment without an account. Revoke access anytime.
-          </p>
-        </div>
-
-        <!-- Feature 6 -->
-        <div class="brand-card p-8">
-          <div
-            class="mb-5 flex size-14 items-center justify-center rounded-2xl text-accent-primary"
-            style="background: rgba(180,145,143,0.1);"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-              <path d="M9 11l3 3L22 4"></path>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-            </svg>
-          </div>
-          <h3 class="text-[20px] font-semibold text-text-primary">Approval workflows</h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Set required approvals per space so every team has the right sign-off process before a cut ships.
-          </p>
-        </div>
-      </div>
+      <ul class="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {quickActions.map((action) => (
+          <li>
+            <a
+              href={action.href}
+              class="brand-card group flex h-full flex-col p-7 transition-all duration-200"
+            >
+              <div class="flex items-center justify-between">
+                <div
+                  class="flex size-12 items-center justify-center rounded-2xl text-accent-primary"
+                  style="background: rgba(180,145,143,0.1);"
+                >
+                  {action.icon === "upload" && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-6">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                  )}
+                  {action.icon === "spaces" && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-6">
+                      <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                      <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                      <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                      <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                    </svg>
+                  )}
+                  {action.icon === "bell" && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-6">
+                      <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                  )}
+                  {action.icon === "link" && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-6">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                  )}
+                  {action.icon === "people" && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-6">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  )}
+                  {action.icon === "check" && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-6">
+                      <path d="M9 11l3 3L22 4"></path>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                  )}
+                </div>
+                <span class="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-text-tertiary">
+                  {action.code}
+                </span>
+              </div>
+              <h3 class="mt-6 text-[19px] font-semibold text-text-primary">
+                {action.title}
+              </h3>
+              <p class="mt-2 flex-1 text-[14px] leading-[1.6] text-text-secondary">
+                {action.hint}
+              </p>
+              <div class="mt-6 flex items-center gap-2 font-mono text-[12px] font-semibold uppercase tracking-[0.12em] text-accent-primary">
+                <span>Open</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="size-4 transition-transform duration-200 group-hover:translate-x-1"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
-  <!-- Spaces -->
+  <!-- Spaces in 30 seconds -->
   <section class="bg-cream">
     <div class="mx-auto grid max-w-[1200px] gap-12 px-6 py-24 sm:px-8 sm:py-28 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
       <div>
         <div
-          class="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.15em] text-accent-primary"
+          class="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-accent-primary"
           style="background: rgba(180,145,143,0.12);"
         >
-          New: Spaces
+          // 00:30 refresher
         </div>
         <h2 class="font-display text-[32px] font-bold leading-[1.15] tracking-tight text-text-primary sm:text-[44px]">
-          Keep every review group in its own space
+          Spaces in 30 seconds
         </h2>
         <p class="mt-5 text-[17px] font-light leading-[1.7] text-text-secondary">
-          Spaces give each team, client, or project a dedicated home for videos, members, approvals, and invite notifications.
-          Switch contexts without mixing feedback, files, or access.
+          Each team or client gets a Space. Members, videos, approvals, and invites are scoped to one space at a time —
+          so the marketing team's roughs never end up in front of the client.
         </p>
         <div class="mt-8 grid gap-4 sm:grid-cols-2">
           <div class="brand-card p-5">
-            <h3 class="text-[15px] font-semibold text-text-primary">Invite teammates</h3>
+            <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-tertiary">members</p>
+            <h3 class="mt-2 text-[15px] font-semibold text-text-primary">Invite teammates</h3>
             <p class="mt-2 text-sm leading-[1.6] text-text-secondary">
-              Send space invites by email and let users accept from their notifications page.
+              Send space invites by email. Pending invites show in the recipient's notifications.
             </p>
           </div>
           <div class="brand-card p-5">
-            <h3 class="text-[15px] font-semibold text-text-primary">Scope access</h3>
+            <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-tertiary">access</p>
+            <h3 class="mt-2 text-[15px] font-semibold text-text-primary">Scope everything</h3>
             <p class="mt-2 text-sm leading-[1.6] text-text-secondary">
-              Videos, folders, members, and approval settings stay tied to the selected space.
+              Videos, members, and approval settings stay tied to whichever space you're in.
             </p>
           </div>
         </div>
       </div>
 
       <div
-        class="rounded-[24px] border-[1.5px] border-border-default bg-white p-3 shadow-[0_24px_64px_-20px_rgba(180,145,143,0.3)]"
+        class="grain-card rounded-[24px] border-[1.5px] border-border-default bg-white p-3 shadow-[0_24px_64px_-20px_rgba(180,145,143,0.3)]"
       >
         <div class="rounded-[16px] border border-border-default bg-cream-subtle p-6">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-5">
             <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-tertiary">Current space</p>
-              <h3 class="mt-1.5 font-display text-[22px] font-semibold text-text-primary">Acme Launch</h3>
+              <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-tertiary">Current space</p>
+              <h3 class="mt-1.5 font-display text-[22px] font-semibold text-text-primary">Spring Drop</h3>
             </div>
             <span
-              class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-primary"
+              class="rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-primary"
               style="background: rgba(180,145,143,0.12);"
             >
               4 members
@@ -475,11 +597,11 @@ if (user) {
                 </div>
                 <div>
                   <p class="text-sm font-medium text-text-primary">Invite pending</p>
-                  <p class="text-xs text-text-tertiary">maya@example.com</p>
+                  <p class="font-mono text-xs text-text-tertiary">maya@wellrox.com</p>
                 </div>
               </div>
               <span
-                class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-warning"
+                class="rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-warning"
                 style="background: rgba(243,156,18,0.12);"
               >
                 Pending
@@ -488,11 +610,11 @@ if (user) {
 
             <div class="grid gap-3 sm:grid-cols-2">
               <div class="rounded-xl border border-border-default bg-white p-4">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-tertiary">Required approvals</p>
+                <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-tertiary">Required approvals</p>
                 <p class="mt-2 font-display text-[28px] font-bold text-text-primary">2</p>
               </div>
               <div class="rounded-xl border border-border-default bg-white p-4">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-tertiary">Videos in review</p>
+                <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-tertiary">Cuts in review</p>
                 <p class="mt-2 font-display text-[28px] font-bold text-text-primary">12</p>
               </div>
             </div>
@@ -502,472 +624,71 @@ if (user) {
     </div>
   </section>
 
-  <!-- Workflow -->
-  <section id="workflow" class="bg-white">
-    <div class="mx-auto max-w-[1200px] px-6 py-24 sm:px-8 sm:py-28">
-      <div class="mx-auto max-w-2xl text-center">
-        <div
-          class="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.15em] text-accent-primary"
-          style="background: rgba(180,145,143,0.1);"
-        >
-          Workflow
-        </div>
-        <h2 class="font-display text-[32px] font-bold leading-[1.15] tracking-tight text-text-primary sm:text-[44px]">
-          From upload to approval in three steps
-        </h2>
-        <p class="mt-5 text-[17px] font-light leading-[1.7] text-text-secondary">
-          A workflow designed for editors and the people who review their work.
-        </p>
-      </div>
-
-      <div class="mt-16 grid gap-8 lg:grid-cols-3 lg:gap-10">
-        <!-- Step 1: Upload -->
-        <div class="brand-card p-8">
-          <div class="flex items-center gap-4">
-            <span
-              class="flex size-16 shrink-0 items-center justify-center rounded-full border-[2px] border-primary-light bg-white font-display text-[24px] font-bold text-accent-primary transition-all duration-300 hover:bg-accent-primary hover:text-white"
-            >
-              1
-            </span>
-            <h3 class="text-[20px] font-semibold text-text-primary">Upload</h3>
-          </div>
-          <p class="mt-5 text-[15px] leading-[1.6] text-text-secondary">
-            Drag a file in. Up to 5GB. Resumable. Add later cuts as versions in the same stack.
-          </p>
-          <!-- Mock upload zone -->
-          <div class="mt-6 rounded-2xl border-2 border-dashed border-primary-light bg-cream-subtle p-5">
-            <div class="flex items-center gap-3">
-              <div
-                class="flex size-10 items-center justify-center rounded-xl text-accent-primary"
-                style="background: rgba(180,145,143,0.12);"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-4">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-semibold text-text-primary">final_cut_v3.mp4</p>
-                <div class="mt-1.5 h-1.5 rounded-full bg-cream-dark">
-                  <div class="h-full w-2/3 rounded-full bg-accent-primary"></div>
-                </div>
-                <p class="mt-1 font-mono text-xs text-text-tertiary">2.1 GB · 67%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 2: Share -->
-        <div class="brand-card p-8">
-          <div class="flex items-center gap-4">
-            <span
-              class="flex size-16 shrink-0 items-center justify-center rounded-full border-[2px] border-primary-light bg-white font-display text-[24px] font-bold text-accent-primary transition-all duration-300 hover:bg-accent-primary hover:text-white"
-            >
-              2
-            </span>
-            <h3 class="text-[20px] font-semibold text-text-primary">Invite or share</h3>
-          </div>
-          <p class="mt-5 text-[15px] leading-[1.6] text-text-secondary">
-            Invite teammates into a space or generate a public link for clients who only need to review.
-          </p>
-          <!-- Mock share card -->
-          <div class="mt-6 rounded-2xl border border-border-default bg-cream-subtle p-4">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-tertiary">Share link</p>
-            <div class="mt-2 flex items-center gap-2">
-              <code
-                class="flex-1 truncate rounded-lg border border-border-default bg-white px-3 py-2 font-mono text-xs text-text-primary"
-              >
-                review.wellrox.com/s/x4Kp9mN2
-              </code>
-              <button
-                class="rounded-full bg-accent-primary px-4 py-2 text-xs font-semibold text-white shadow-[0_2px_12px_rgba(180,145,143,0.25)]"
-              >
-                Copy
-              </button>
-            </div>
-            <div class="mt-3 flex items-center justify-between text-xs">
-              <span class="inline-flex items-center gap-1.5 font-medium text-accent-secondary">
-                <span class="size-1.5 rounded-full bg-accent-secondary"></span>
-                Active
-              </span>
-              <span class="font-mono text-text-tertiary">12 views</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 3: Review -->
-        <div class="brand-card p-8">
-          <div class="flex items-center gap-4">
-            <span
-              class="flex size-16 shrink-0 items-center justify-center rounded-full border-[2px] border-primary-light bg-white font-display text-[24px] font-bold text-accent-primary transition-all duration-300 hover:bg-accent-primary hover:text-white"
-            >
-              3
-            </span>
-            <h3 class="text-[20px] font-semibold text-text-primary">Review</h3>
-          </div>
-          <p class="mt-5 text-[15px] leading-[1.6] text-text-secondary">
-            Comments anchor to timestamps and stay tied to the version they were created on. Reply, resolve, repeat.
-          </p>
-          <!-- Mock comment thread -->
-          <div class="mt-6 space-y-2.5">
-            <div class="rounded-xl border border-border-default bg-cream-subtle p-3">
-              <div class="flex items-center gap-2">
-                <div
-                  class="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-primary text-[10px] font-semibold text-white"
-                >
-                  AB
-                </div>
-                <span class="text-xs font-semibold text-text-primary">Alex</span>
-                <span class="font-mono text-[11px] font-medium text-accent-primary">0:42</span>
-              </div>
-              <p class="mt-2 pl-9 text-xs leading-relaxed text-text-secondary">Logo lockup feels off-center here.</p>
-            </div>
-            <div class="rounded-xl border border-border-default bg-cream-subtle p-3">
-              <div class="flex items-center gap-2">
-                <div
-                  class="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-secondary text-[10px] font-semibold text-white"
-                >
-                  MK
-                </div>
-                <span class="text-xs font-semibold text-text-primary">Maya</span>
-                <span class="font-mono text-[11px] font-medium text-accent-primary">1:18</span>
-                <span
-                  class="ml-auto rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-accent-secondary"
-                  style="background: rgba(56,161,105,0.12);"
-                >
-                  Resolved
-                </span>
-              </div>
-              <p class="mt-2 pl-9 text-xs leading-relaxed text-text-secondary">Great pacing on this transition.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Cloudflare Stack -->
-  <section id="stack" class="bg-cream-subtle">
-    <div class="mx-auto max-w-[1200px] px-6 py-24 sm:px-8 sm:py-28">
-      <div class="mx-auto max-w-2xl text-center">
-        <div
-          class="mb-5 inline-flex items-center gap-2 rounded-full border-[1.5px] border-border-default bg-white px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.15em] text-text-secondary"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" class="size-3.5 text-[#F38020]">
-            <path d="M16.5 13.5l-9-9-1.5 1.5 9 9zm0-3l-6-6L9 6l6 6zm-3 6l-6-6L6 12l6 6z"></path>
-          </svg>
-          Built on Cloudflare
-        </div>
-        <h2 class="font-display text-[32px] font-bold leading-[1.15] tracking-tight text-text-primary sm:text-[44px]">
-          Globally distributed by default
-        </h2>
-        <p class="mt-5 text-[17px] font-light leading-[1.7] text-text-secondary">
-          Every part of Wellrox Video Review runs on Cloudflare's network. Fast for every reviewer, anywhere — with
-          serverless economics that scale to zero.
-        </p>
-      </div>
-
-      <div class="mt-16 grid gap-6 sm:grid-cols-2">
-        <!-- Workers -->
-        <div class="brand-card p-8">
-          <div class="flex items-start justify-between">
-            <div
-              class="flex size-14 items-center justify-center rounded-2xl text-[#F38020]"
-              style="background: rgba(243,128,32,0.12);"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-                <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline>
-              </svg>
-            </div>
-            <span
-              class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-primary"
-              style="background: rgba(180,145,143,0.12);"
-            >
-              Edge compute
-            </span>
-          </div>
-          <h3 class="mt-5 font-display text-[24px] font-bold text-text-primary">
-            <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-accent-primary">Workers</a>
-          </h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            The entire Astro app runs at the edge — auth, API routes, page rendering. Sub-50ms cold starts
-            in 300+ cities means reviewers never wait on the network.
-          </p>
-          <p class="mt-4 text-sm font-medium text-accent-primary">
-            Zero-ops global deployment, predictable performance.
-          </p>
-        </div>
-
-        <!-- D1 -->
-        <div class="brand-card p-8">
-          <div class="flex items-start justify-between">
-            <div
-              class="flex size-14 items-center justify-center rounded-2xl text-accent-info"
-              style="background: rgba(52,152,219,0.12);"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
-                <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
-              </svg>
-            </div>
-            <span
-              class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-info"
-              style="background: rgba(52,152,219,0.12);"
-            >
-              Serverless SQL
-            </span>
-          </div>
-          <h3 class="mt-5 font-display text-[24px] font-bold text-text-primary">
-            <a href="https://developers.cloudflare.com/d1/" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-accent-info">D1</a>
-          </h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Users, sessions, videos, version groups, comments, share links — all in serverless SQLite.
-            We use Drizzle ORM for type-safe queries with zero infrastructure to manage.
-          </p>
-          <p class="mt-4 text-sm font-medium text-accent-info">
-            No DB ops, low latency reads, scales to zero.
-          </p>
-        </div>
-
-        <!-- Stream -->
-        <div class="brand-card p-8">
-          <div class="flex items-start justify-between">
-            <div
-              class="flex size-14 items-center justify-center rounded-2xl text-accent-primary"
-              style="background: rgba(180,145,143,0.12);"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-                <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-              </svg>
-            </div>
-            <span
-              class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-primary"
-              style="background: rgba(180,145,143,0.12);"
-            >
-              Video infra
-            </span>
-          </div>
-          <h3 class="mt-5 font-display text-[24px] font-bold text-text-primary">
-            <a href="https://developers.cloudflare.com/stream/" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-accent-primary">Stream</a>
-          </h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            Direct-to-Stream TUS uploads, automatic transcoding, thumbnail generation, and adaptive
-            HLS/DASH delivery. We never touch the bytes ourselves.
-          </p>
-          <p class="mt-4 text-sm font-medium text-accent-primary">
-            Zero egress fees, resumable uploads, global CDN delivery.
-          </p>
-        </div>
-
-        <!-- Workers Assets -->
-        <div class="brand-card p-8">
-          <div class="flex items-start justify-between">
-            <div
-              class="flex size-14 items-center justify-center rounded-2xl text-accent-secondary"
-              style="background: rgba(56,161,105,0.12);"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="size-7">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-            </div>
-            <span
-              class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-accent-secondary"
-              style="background: rgba(56,161,105,0.12);"
-            >
-              Static assets
-            </span>
-          </div>
-          <h3 class="mt-5 font-display text-[24px] font-bold text-text-primary">
-            <a href="https://developers.cloudflare.com/workers/static-assets/" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-accent-secondary">Workers Assets</a>
-          </h3>
-          <p class="mt-3 text-[15px] leading-[1.6] text-text-secondary">
-            The static Astro build is served straight from Cloudflare's network, cached at every edge POP
-            for instant page loads worldwide.
-          </p>
-          <p class="mt-4 text-sm font-medium text-accent-secondary">
-            Free, fast, automatic — no separate CDN to wire up.
-          </p>
-        </div>
-      </div>
-
-      <p class="mt-10 text-center text-sm text-text-tertiary">
-        Plus <a href="https://developers.cloudflare.com/workers/observability/" target="_blank" rel="noopener noreferrer" class="font-medium text-text-secondary underline decoration-border-default underline-offset-4 transition-colors hover:text-accent-primary hover:decoration-accent-primary">Workers Observability</a> for production telemetry.
-      </p>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq" class="bg-white">
-    <div class="mx-auto max-w-3xl px-6 py-24 sm:px-8 sm:py-28">
-      <div class="text-center">
-        <div
-          class="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.15em] text-accent-primary"
-          style="background: rgba(180,145,143,0.1);"
-        >
-          FAQ
-        </div>
-        <h2 class="font-display text-[32px] font-bold leading-[1.15] tracking-tight text-text-primary sm:text-[44px]">
-          Frequently asked questions
-        </h2>
-      </div>
-
-      <div class="mt-14 space-y-4">
-        <details class="group rounded-2xl border-[1.5px] border-border-default bg-cream-subtle p-6 transition-colors hover:border-primary-light">
-          <summary class="flex cursor-pointer items-center justify-between text-[15px] font-semibold text-text-primary">
-            Do reviewers need an account?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-text-tertiary transition-transform group-open:rotate-180">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </summary>
-          <p class="mt-4 text-[15px] leading-[1.7] text-text-secondary">
-            No. Anyone with a share link can leave timestamped comments after entering a display name. You
-            stay in control — revoke any link at any time.
-          </p>
-        </details>
-
-        <details class="group rounded-2xl border-[1.5px] border-border-default bg-cream-subtle p-6 transition-colors hover:border-primary-light">
-          <summary class="flex cursor-pointer items-center justify-between text-[15px] font-semibold text-text-primary">
-            What are spaces for?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-text-tertiary transition-transform group-open:rotate-180">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </summary>
-          <p class="mt-4 text-[15px] leading-[1.7] text-text-secondary">
-            Spaces keep videos, folders, members, invites, and approval settings grouped by team, client, or project.
-            Use public share links when someone only needs temporary review access.
-          </p>
-        </details>
-
-        <details class="group rounded-2xl border-[1.5px] border-border-default bg-cream-subtle p-6 transition-colors hover:border-primary-light">
-          <summary class="flex cursor-pointer items-center justify-between text-[15px] font-semibold text-text-primary">
-            What file types and sizes are supported?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-text-tertiary transition-transform group-open:rotate-180">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </summary>
-          <p class="mt-4 text-[15px] leading-[1.7] text-text-secondary">
-            MP4, MOV, WebM, AVI, and MKV up to 5GB per file. Uploads are resumable — close your laptop,
-            come back later, and pick up where you left off.
-          </p>
-        </details>
-
-        <details class="group rounded-2xl border-[1.5px] border-border-default bg-cream-subtle p-6 transition-colors hover:border-primary-light">
-          <summary class="flex cursor-pointer items-center justify-between text-[15px] font-semibold text-text-primary">
-            Is my video secure?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-text-tertiary transition-transform group-open:rotate-180">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </summary>
-          <p class="mt-4 text-[15px] leading-[1.7] text-text-secondary">
-            Videos are private by default. Only people with an explicit share link can view them, and you
-            can revoke any link instantly. Authentication uses PBKDF2-hashed passwords and HttpOnly secure
-            cookies.
-          </p>
-        </details>
-
-        <details class="group rounded-2xl border-[1.5px] border-border-default bg-cream-subtle p-6 transition-colors hover:border-primary-light">
-          <summary class="flex cursor-pointer items-center justify-between text-[15px] font-semibold text-text-primary">
-            How do video versions work?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-text-tertiary transition-transform group-open:rotate-180">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </summary>
-          <p class="mt-4 text-[15px] leading-[1.7] text-text-secondary">
-            Each uploaded version is its own reviewable video in a shared stack. Comments, annotations,
-            share links, and review status stay tied to the specific version they were created on.
-          </p>
-        </details>
-
-        <details class="group rounded-2xl border-[1.5px] border-border-default bg-cream-subtle p-6 transition-colors hover:border-primary-light">
-          <summary class="flex cursor-pointer items-center justify-between text-[15px] font-semibold text-text-primary">
-            Where is Wellrox Video Review hosted?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-text-tertiary transition-transform group-open:rotate-180">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </summary>
-          <p class="mt-4 text-[15px] leading-[1.7] text-text-secondary">
-            Entirely on Cloudflare's global network — Workers for compute, D1 for data, Stream for video,
-            Workers Assets for the static frontend. No origin servers, no separate CDN.
-          </p>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <!-- Final CTA -->
+  <!-- Sign-off strip -->
   <section class="bg-white">
-    <div class="mx-auto max-w-[1200px] px-6 py-20 sm:px-8 sm:py-28">
+    <div class="mx-auto max-w-[1200px] px-6 py-16 sm:px-8 sm:py-20">
       <div
-        class="relative overflow-hidden rounded-[28px] border-[1.5px] border-border-default p-10 text-center sm:p-16"
-        style="background: linear-gradient(135deg, #faf8f5 0%, #f7f3ef 50%, #ede7e0 100%);"
+        class="relative overflow-hidden rounded-[24px] border-[1.5px] border-border-default px-8 py-10 sm:px-12"
+        style="background: linear-gradient(135deg, #faf8f5 0%, #f7f3ef 60%, #ede7e0 100%);"
       >
-        <div
-          class="pointer-events-none absolute inset-0"
-          style="background: radial-gradient(ellipse at center, rgba(180,145,143,0.18), transparent 60%);"
-        >
-        </div>
         <img
           src="/gray-rocks.png"
           alt=""
           aria-hidden="true"
-          class="pointer-events-none absolute -bottom-8 -right-8 hidden h-[260px] w-auto opacity-[0.08] sm:block"
+          class="pointer-events-none absolute -bottom-6 -right-6 hidden h-[160px] w-auto opacity-[0.07] sm:block"
         />
-        <div class="relative">
-          <h2 class="font-display text-[32px] font-bold leading-[1.15] tracking-tight text-text-primary sm:text-[48px]">
-            Start reviewing in under 60 seconds
-          </h2>
-          <p class="mx-auto mt-5 max-w-xl text-[17px] font-light leading-[1.7] text-text-secondary">
-            Free to start. Upload your first video and share a link before your coffee gets cold.
-          </p>
-          <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="/register"
-              class="inline-flex items-center justify-center rounded-full bg-accent-primary px-12 py-[18px] text-[17px] font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)]"
-            >
-              Get Started Free
-            </a>
-            <a
-              href="/login"
-              class="inline-flex items-center justify-center rounded-full border-[1.5px] border-border-default bg-white px-10 py-[18px] text-[17px] font-semibold text-text-primary transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-light"
-            >
-              Sign In
-            </a>
+        <div class="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <p class="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-text-tertiary">// end credits</p>
+            <h2 class="mt-2 font-display text-[28px] font-bold leading-tight tracking-tight text-text-primary sm:text-[36px]">
+              That's the tour. Ship something.
+            </h2>
           </div>
+          <a
+            href="/login"
+            class="inline-flex shrink-0 items-center justify-center rounded-full bg-accent-primary px-10 py-[16px] text-[16px] font-semibold text-white shadow-[0_4px_24px_rgba(180,145,143,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_8px_40px_rgba(180,145,143,0.4)]"
+          >
+            Sign in
+          </a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer (dark) -->
+  <!-- Footer (dark, slim) -->
   <footer class="bg-bg-dark text-white/85">
-    <div class="mx-auto max-w-[1200px] px-6 py-14 sm:px-8 sm:py-16">
+    <div class="mx-auto max-w-[1200px] px-6 py-12 sm:px-8 sm:py-14">
       <div class="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
         <div class="flex flex-col items-center gap-3 sm:items-start">
           <img
             src="/wellrox-logo.png"
             alt="Wellrox"
-            class="h-10 w-auto"
+            class="h-9 w-auto"
             style="filter: brightness(0) invert(1);"
           />
           <p class="font-display text-sm italic text-white/60">Move Well. Live Well.</p>
-          <p class="mt-2 text-[10px] font-medium uppercase tracking-[0.18em] text-white/55">
-            Balance · Strength · Movement
+          <p class="text-[10px] font-medium uppercase tracking-[0.18em] text-white/55">
+            Internal video review · Wellrox
           </p>
         </div>
 
-        <div class="flex flex-col items-center gap-4 sm:items-end">
-          <div class="flex items-center gap-6">
-            <a href="/login" class="text-sm text-white/70 transition-colors hover:text-white">Sign in</a>
-            <a href="/register" class="text-sm text-white/70 transition-colors hover:text-white">Register</a>
-            <a href="#features" class="text-sm text-white/70 transition-colors hover:text-white">Features</a>
-            <a href="#faq" class="text-sm text-white/70 transition-colors hover:text-white">FAQ</a>
-          </div>
+        <div class="flex flex-col items-center gap-3 sm:items-end">
           <p class="text-xs text-white/50">© 2026 Wellrox. All rights reserved.</p>
+          <p class="flex items-center gap-1.5 text-[11px] text-white/45">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="size-3.5" aria-hidden="true">
+              <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.42c.58.11.79-.25.79-.55v-1.93c-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.27-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.17a10.96 10.96 0 0 1 5.74 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.58.23 2.75.12 3.04.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.36.78 1.06.78 2.13v3.16c0 .31.2.67.8.55A11.5 11.5 0 0 0 12 .5z" />
+            </svg>
+            Forked from
+            <a
+              href="https://github.com/jamesqquick/quickcut"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="underline decoration-white/30 underline-offset-4 transition-colors hover:text-white/80 hover:decoration-white/60"
+            >
+              QuickCut
+            </a>
+            by James Q Quick · with respect.
+          </p>
         </div>
       </div>
     </div>
