@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { InviteResponse } from "../../components/InviteResponse";
 import { createDb } from "../../db";
-import { spaceInvites, spaces } from "../../db/schema";
+import { spaceInvites, spaces, users } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 
@@ -11,12 +11,6 @@ const { token } = Astro.params;
 
 if (!token) {
   return Astro.redirect("/login");
-}
-
-// If not logged in, redirect to login with return URL
-if (!user) {
-  const returnUrl = encodeURIComponent(`/invites/${token}`);
-  return Astro.redirect(`/login?message=Sign in to accept your invite&returnUrl=${returnUrl}`);
 }
 
 const db = createDb(env.DB);
@@ -36,7 +30,29 @@ const invite = await db
   .limit(1);
 
 const inv = invite[0] ?? null;
-const emailMatch = inv ? user.email.toLowerCase() === inv.email.toLowerCase() : false;
+
+// If not logged in, route to /register (no account yet) or /login (already have one).
+// We do this before rendering so external invitees don't see a "Sign in to accept"
+// nudge for an account they don't have.
+if (!user && inv && inv.status === "pending") {
+  const existingUser = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, inv.email.toLowerCase()))
+    .limit(1);
+
+  if (existingUser.length === 0) {
+    return Astro.redirect(`/register?inviteToken=${encodeURIComponent(token)}`);
+  }
+
+  const returnUrl = encodeURIComponent(`/invites/${token}`);
+  return Astro.redirect(`/login?message=Sign in to accept your invite&returnUrl=${returnUrl}`);
+}
+
+// Still need to handle the unauthenticated + invalid/expired case below by
+// rendering the "Invite not found" / "already accepted" UI without a user.
+
+const emailMatch = user && inv ? user.email.toLowerCase() === inv.email.toLowerCase() : false;
 ---
 
 <Layout title="Space Invite" user={user}>
@@ -97,7 +113,7 @@ const emailMatch = inv ? user.email.toLowerCase() === inv.email.toLowerCase() : 
             <h2 class="text-lg font-semibold text-text-primary">Email mismatch</h2>
             <p class="mt-2 text-sm text-text-secondary">
               This invite was sent to a different email address. You're signed in
-              as <span class="font-medium text-text-primary">{user.email}</span>.
+              as <span class="font-medium text-text-primary">{user!.email}</span>.
             </p>
             <a
               href="/dashboard"

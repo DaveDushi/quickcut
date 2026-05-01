@@ -1,5 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { createDb } from "../db";
+import { spaceInvites, spaces } from "../db/schema";
+import { eq } from "drizzle-orm";
+import { env } from "cloudflare:workers";
 
 const user = Astro.locals.user;
 if (user) {
@@ -7,16 +11,48 @@ if (user) {
 }
 
 const error = Astro.url.searchParams.get("error");
+const inviteToken = Astro.url.searchParams.get("inviteToken")?.trim() || null;
+
+let invite: {
+  email: string;
+  spaceName: string;
+} | null = null;
+
+if (inviteToken) {
+  const db = createDb(env.DB);
+  const rows = await db
+    .select({
+      email: spaceInvites.email,
+      status: spaceInvites.status,
+      spaceName: spaces.name,
+    })
+    .from(spaceInvites)
+    .innerJoin(spaces, eq(spaceInvites.spaceId, spaces.id))
+    .where(eq(spaceInvites.token, inviteToken))
+    .limit(1);
+
+  const row = rows[0];
+  if (row && row.status === "pending") {
+    invite = { email: row.email, spaceName: row.spaceName };
+  }
+}
 ---
 
 <Layout title="Create Account">
   <div class="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
     <div class="w-full max-w-[400px]">
       <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-text-primary">Quick Cuts</h1>
-        <p class="mt-2 text-sm text-text-secondary">
-          Create your account with your Cloudflare email to start reviewing videos.
-        </p>
+        <h1 class="text-3xl font-bold text-text-primary">Wellrox Video Review</h1>
+        {invite ? (
+          <p class="mt-2 text-sm text-text-secondary">
+            You've been invited to join <span class="font-medium text-text-primary">{invite.spaceName}</span>.
+            Set up your account to accept.
+          </p>
+        ) : (
+          <p class="mt-2 text-sm text-text-secondary">
+            Create your account with your Wellrox email to start reviewing videos.
+          </p>
+        )}
       </div>
 
       <div class="rounded-2xl border border-border-default bg-bg-secondary p-8">
@@ -27,6 +63,9 @@ const error = Astro.url.searchParams.get("error");
         )}
 
         <form method="POST" action="/api/auth/register" class="space-y-4">
+          {inviteToken && (
+            <input type="hidden" name="inviteToken" value={inviteToken} />
+          )}
           <div>
             <label for="displayName" class="mb-1 block text-sm font-medium text-text-secondary">
               Display Name
@@ -49,10 +88,16 @@ const error = Astro.url.searchParams.get("error");
               id="email"
               name="email"
               required
-              class="w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none"
-              placeholder="you@cloudflare.com"
+              readonly={invite !== null}
+              value={invite?.email ?? ""}
+              class={`w-full rounded-lg border border-border-default bg-bg-input px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent-primary focus:outline-none ${invite ? "cursor-not-allowed opacity-70" : ""}`}
+              placeholder="you@wellrox.com"
             />
-            <p class="mt-1 text-xs text-text-tertiary">Quick Cuts is currently limited to Cloudflare email addresses.</p>
+            {!invite && (
+              <p class="mt-1 text-xs text-text-tertiary">
+                Wellrox Video Review is limited to wellrox.com email addresses. External collaborators must use an invite link.
+              </p>
+            )}
           </div>
           <div>
             <label for="password" class="mb-1 block text-sm font-medium text-text-secondary">
@@ -86,7 +131,7 @@ const error = Astro.url.searchParams.get("error");
             type="submit"
             class="w-full rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover hover:shadow-[0_2px_8px_rgba(108,92,231,0.3)]"
           >
-            Create Account
+            {invite ? "Accept Invite & Create Account" : "Create Account"}
           </button>
         </form>
 

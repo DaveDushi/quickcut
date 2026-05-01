@@ -63,7 +63,26 @@ export function SpaceSettings({
   // Invite form state
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteSaving, setInviteSaving] = useState(false);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const { toasts, showToast, dismissToast } = useToast();
+
+  const inviteUrl = (token: string) =>
+    typeof window !== "undefined"
+      ? `${window.location.origin}/invites/${token}`
+      : `/invites/${token}`;
+
+  const handleCopyInvite = async (token: string) => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl(token));
+      setCopiedToken(token);
+      showToast("Invite link copied");
+      setTimeout(() => {
+        setCopiedToken((current) => (current === token ? null : current));
+      }, 2000);
+    } catch {
+      showToast("Failed to copy link", "error");
+    }
+  };
 
   // General action state
   const [actionError, setActionError] = useState("");
@@ -335,20 +354,37 @@ export function SpaceSettings({
           {invites.length > 0 && (
             <ul className="mt-4 divide-y divide-border-default">
               {invites.map((invite) => (
-                <li key={invite.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm text-text-primary">{invite.email}</p>
-                    <p className="text-xs text-text-tertiary">
-                      Invited {new Date(invite.createdAt).toLocaleDateString()}
-                    </p>
+                <li key={invite.id} className="py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-text-primary">{invite.email}</p>
+                      <p className="text-xs text-text-tertiary">
+                        Invited {new Date(invite.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRevokeInvite(invite.id)}
+                      className="shrink-0 rounded-lg px-2 py-1 text-xs text-accent-danger transition-colors hover:bg-accent-danger/15"
+                    >
+                      Revoke
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRevokeInvite(invite.id)}
-                    className="rounded-lg px-2 py-1 text-xs text-accent-danger transition-colors hover:bg-accent-danger/15"
-                  >
-                    Revoke
-                  </button>
+                  <div className="mt-2 flex items-center gap-2">
+                    <code className="flex-1 truncate rounded-md border border-border-default bg-bg-input px-2.5 py-1.5 font-mono text-xs text-text-secondary">
+                      {inviteUrl(invite.token)}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyInvite(invite.token)}
+                      className="shrink-0 rounded-md border border-border-default bg-bg-tertiary px-3 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-bg-input"
+                    >
+                      {copiedToken === invite.token ? "Copied!" : "Copy link"}
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-text-tertiary">
+                    Send this link to {invite.email} to accept the invite.
+                  </p>
                 </li>
               ))}
             </ul>

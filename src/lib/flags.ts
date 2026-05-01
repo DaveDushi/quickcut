@@ -10,14 +10,5 @@ export async function isTranscriptGenerationEnabled(
   user: FlagUser | null | undefined,
 ): Promise<boolean> {
   if (!user) return false;
-  if (env.TRANSCRIPTS_ENABLED === "false") return false;
-
-  try {
-    return await env.FLAGS.getBooleanValue(TRANSCRIPT_GENERATION_FLAG, false, {
-      userId: user.id,
-      email: user.email,
-    });
-  } catch {
-    return false;
-  }
+  return env.TRANSCRIPTS_ENABLED !== "false";
 }
