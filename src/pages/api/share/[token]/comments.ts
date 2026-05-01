@@ -5,6 +5,7 @@ import { shareLinks, comments, users } from "../../../../db/schema";
 import { eq, asc, gt, and } from "drizzle-orm";
 import { broadcastNewComment } from "../../../../lib/broadcast";
 import { addReactionSummaries } from "../../../../lib/comments";
+import { enqueueCommentNotification } from "../../../../lib/notifications";
 
 export const GET: APIRoute = async ({ params, url }) => {
   const { token } = params;
@@ -161,6 +162,18 @@ export const POST: APIRoute = async ({ params, request }) => {
   };
 
   await broadcastNewComment(env, videoId, responseComment);
+
+  try {
+    await enqueueCommentNotification(db, {
+      id: commentId,
+      videoId,
+      parentId: newComment.parentId,
+      authorType: "anonymous",
+      authorUserId: null,
+    });
+  } catch (err) {
+    console.error("[share/comments] enqueueCommentNotification failed:", err);
+  }
 
   return new Response(JSON.stringify({ comment: responseComment }), {
     status: 201,

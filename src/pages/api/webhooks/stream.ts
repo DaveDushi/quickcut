@@ -4,6 +4,7 @@ import { createDb } from "../../../db";
 import { videos } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 import { queueTranscriptForVideo } from "../../../lib/transcripts";
+import { enqueueVideoReadyNotification } from "../../../lib/notifications";
 
 interface StreamWebhookPayload {
   uid: string;
@@ -109,6 +110,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (payload.readyToStream && payload.status.state === "ready") {
     const now = new Date().toISOString();
+    const wasAlreadyReady = video.status === "ready";
     await db
       .update(videos)
       .set({
@@ -128,6 +130,21 @@ export const POST: APIRoute = async ({ request }) => {
       streamPlaybackUrl: payload.playback.hls,
       updatedAt: now,
     });
+
+    if (!wasAlreadyReady) {
+      try {
+        await enqueueVideoReadyNotification(db, {
+          id: video.id,
+          spaceId: video.spaceId,
+          uploadedBy: video.uploadedBy,
+        });
+      } catch (err) {
+        console.error(
+          "[stream webhook] enqueueVideoReadyNotification failed:",
+          err,
+        );
+      }
+    }
   } else if (payload.status.state === "error") {
     await db
       .update(videos)

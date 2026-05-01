@@ -51,5 +51,10 @@
 		"STREAM_ACCOUNT_ID": "11b42dee5d79818e2232c6a4c86d13e9",
 		"TRANSCRIPTS_ENABLED": "true",
 		"TRANSCRIPT_CLEANUP_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+		"EMAIL_FROM": "Wellrox Video Review <noreply@wellrox.com>",
+		"APP_URL": "https://review.wellrox.com",
+	},
+	"triggers": {
+		"crons": ["0 * * * *"],
 	},
 }

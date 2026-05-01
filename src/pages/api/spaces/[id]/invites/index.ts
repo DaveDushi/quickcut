@@ -3,9 +3,10 @@ import { env } from "cloudflare:workers";
 import { and, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { createDb } from "../../../../../db";
-import { spaceInvites } from "../../../../../db/schema";
+import { spaceInvites, spaces } from "../../../../../db/schema";
 import { inviteCreateSchema } from "../../../../../lib/validation";
 import { verifySpaceAccess } from "../../../../../lib/spaces";
+import { sendInviteEmailNow } from "../../../../../lib/notifications";
 
 export const GET: APIRoute = async ({ params, locals }) => {
   if (!locals.user) {
@@ -115,6 +116,24 @@ export const POST: APIRoute = async ({ params, locals, request }) => {
     .from(spaceInvites)
     .where(eq(spaceInvites.id, invite.id))
     .limit(1);
+
+  try {
+    const spaceRow = await db
+      .select({ name: spaces.name })
+      .from(spaces)
+      .where(eq(spaces.id, spaceId))
+      .limit(1);
+    if (spaceRow.length > 0) {
+      await sendInviteEmailNow(env, {
+        inviteToken: invite.token,
+        inviteeEmail: invite.email,
+        inviterName: locals.user.displayName,
+        spaceName: spaceRow[0].name,
+      });
+    }
+  } catch (err) {
+    console.error("[invites] sendInviteEmailNow failed:", err);
+  }
 
   return new Response(JSON.stringify({ invite: created[0] }), {
     status: 201,

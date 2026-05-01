@@ -7,6 +7,7 @@ import { broadcastNewComment } from "../../../../lib/broadcast";
 import { verifySpaceAccess } from "../../../../lib/spaces";
 import { addReactionSummaries } from "../../../../lib/comments";
 import { commentSchema } from "../../../../lib/validation";
+import { enqueueCommentNotification } from "../../../../lib/notifications";
 
 export const GET: APIRoute = async ({ params, locals, url }) => {
   if (!locals.user) {
@@ -184,6 +185,18 @@ export const POST: APIRoute = async ({ params, locals, request }) => {
   };
 
   await broadcastNewComment(env, id, responseComment);
+
+  try {
+    await enqueueCommentNotification(db, {
+      id: commentId,
+      videoId: id,
+      parentId: newComment.parentId,
+      authorType: "user",
+      authorUserId: locals.user.id,
+    });
+  } catch (err) {
+    console.error("[comments] enqueueCommentNotification failed:", err);
+  }
 
   return new Response(JSON.stringify({ comment: responseComment }), {
     status: 201,

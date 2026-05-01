@@ -300,6 +300,29 @@ export const comments = sqliteTable("comments", {
     .default(sql`(datetime('now'))`),
 });
 
+export const pendingEmailNotifications = sqliteTable(
+  "pending_email_notifications",
+  {
+    id: text("id").primaryKey(),
+    recipientUserId: text("recipient_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind", {
+      enum: ["comment_uploader", "comment_reply", "video_ready"],
+    }).notNull(),
+    commentId: text("comment_id").references(() => comments.id, {
+      onDelete: "cascade",
+    }),
+    videoId: text("video_id")
+      .notNull()
+      .references(() => videos.id, { onDelete: "cascade" }),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+);
+
 export const commentReactions = sqliteTable(
   "comment_reactions",
   {
