@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers";
 import { eq } from "drizzle-orm";
 import { createDb } from "../../../../db";
 import { videos } from "../../../../db/schema";
-import { createDirectUpload } from "../../../../lib/stream";
+import { createDirectUpload, deleteVideo, getVideoInfo } from "../../../../lib/stream";
 import { isTranscriptGenerationEnabled } from "../../../../lib/flags";
 import { verifySpaceAccess } from "../../../../lib/spaces";
 import { uploadSchema } from "../../../../lib/validation";
@@ -44,7 +44,27 @@ export const POST: APIRoute = async ({ params, locals, request }) => {
 
   if (!project) return json({ error: "Project not found" }, 404);
   if (project.phase === "published") return json({ error: "Cannot upload to a published project" }, 403);
-  if (project.status !== "draft" || project.streamVideoId) {
+
+  // Allow retry if a previous upload attempt left a stale streamVideoId pointing
+  // at a Stream video that never finished uploading (state === "pendingupload" or
+  // the Stream record is gone). Clean it up and continue.
+  if (project.streamVideoId) {
+    let canRetry = false;
+    try {
+      const info = await getVideoInfo(env.STREAM_ACCOUNT_ID, env.STREAM_API_TOKEN, project.streamVideoId);
+      canRetry = !info.readyToStream && info.status.state === "pendingupload";
+    } catch {
+      // 404 / lookup failure — Stream record is gone, treat as retry-able.
+      canRetry = true;
+    }
+    if (!canRetry) {
+      return json({ error: "This project already has a video" }, 409);
+    }
+    // Best-effort cleanup of the abandoned Stream record. Ignore errors.
+    try {
+      await deleteVideo(env.STREAM_ACCOUNT_ID, env.STREAM_API_TOKEN, project.streamVideoId);
+    } catch {}
+  } else if (project.status !== "draft") {
     return json({ error: "This project already has a video" }, 409);
   }
 

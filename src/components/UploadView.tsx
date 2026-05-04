@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import * as tus from "tus-js-client";
 
 const ALLOWED_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024;
@@ -84,32 +85,46 @@ export function UploadView({
       if (!res.ok || !data?.uploadUrl) throw new Error(data?.error || "Failed to create upload");
 
       const targetVideoId = data.videoId || videoId;
-      const xhr = new XMLHttpRequest();
-      xhr.open("PATCH", data.uploadUrl);
-      xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-      xhr.setRequestHeader("Upload-Offset", "0");
-      xhr.setRequestHeader("Content-Type", "application/offset+octet-stream");
 
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) setProgress(Math.round((event.loaded / event.total) * 100));
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
+      // Chunked + resumable tus upload. 25 MB chunks keep individual PATCHes
+      // short enough to dodge middlebox/edge TCP RSTs, while staying under
+      // Cloudflare Stream's 200 MB per-chunk cap and meeting the 256 KiB
+      // alignment requirement.
+      const tusUpload = new tus.Upload(file, {
+        endpoint: data.uploadUrl,
+        uploadUrl: data.uploadUrl,
+        chunkSize: 25 * 1024 * 1024,
+        retryDelays: [0, 1000, 3000, 6000, 12000, 24000, 60000],
+        metadata: {
+          filename: file.name,
+          filetype: file.type,
+        },
+        onShouldRetry: (err) => {
+          const status =
+            (err as tus.DetailedError).originalResponse?.getStatus?.() ?? 0;
+          if (status === 0) return true;
+          if (status === 408 || status === 429) return true;
+          if (status >= 500 && status < 600) return true;
+          return false;
+        },
+        onError: (err) => {
+          const status =
+            (err as tus.DetailedError).originalResponse?.getStatus?.() ?? null;
+          const detail = status ? `${status} ${err.message}` : err.message;
+          setError(`Upload failed: ${detail}`);
+          setState("error");
+        },
+        onProgress: (bytesUploaded, bytesTotal) => {
+          if (bytesTotal > 0) {
+            setProgress(Math.round((bytesUploaded / bytesTotal) * 100));
+          }
+        },
+        onSuccess: () => {
           setState("processing");
           window.location.href = `/videos/${targetVideoId}?tab=video`;
-          return;
-        }
-        setError("Upload failed. Please try again.");
-        setState("error");
-      };
-
-      xhr.onerror = () => {
-        setError("Upload failed. Please try again.");
-        setState("error");
-      };
-
-      xhr.send(file);
+        },
+      });
+      tusUpload.start();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
       setState("error");

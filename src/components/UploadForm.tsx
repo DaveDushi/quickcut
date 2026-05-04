@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import * as tus from "tus-js-client";
 
 const ALLOWED_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
@@ -97,38 +98,50 @@ export function UploadForm({ folderId = null, spaces, selectedSpaceId, transcrip
         uploadUrl: string;
       };
 
-      // Step 2: Upload directly to Cloudflare Stream via TUS
-      const xhr = new XMLHttpRequest();
-      xhr.open("PATCH", uploadUrl);
-      xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-      xhr.setRequestHeader("Upload-Offset", "0");
-      xhr.setRequestHeader("Content-Type", "application/offset+octet-stream");
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          setProgress(Math.round((e.loaded / e.total) * 100));
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
+      // Step 2: Upload directly to Cloudflare Stream via tus (chunked + resumable).
+      // 25 MB chunks: small enough that any single PATCH finishes in <30s on a
+      // ~10 Mbps uplink (avoids middlebox / Cloudflare edge TCP RSTs that hit
+      // longer-lived connections), still a multiple of 256 KiB as required, and
+      // well under Stream's 200 MB per-chunk cap.
+      const upload = new tus.Upload(file, {
+        endpoint: uploadUrl,
+        uploadUrl,
+        chunkSize: 25 * 1024 * 1024,
+        retryDelays: [0, 1000, 3000, 6000, 12000, 24000, 60000],
+        metadata: {
+          filename: file.name,
+          filetype: file.type,
+        },
+        onShouldRetry: (err) => {
+          const status =
+            (err as tus.DetailedError).originalResponse?.getStatus?.() ?? 0;
+          // Retry on transient network/server errors. 4xx (except 408/429) are
+          // permanent client errors and shouldn't be retried.
+          if (status === 0) return true; // connection reset / abort / DNS
+          if (status === 408 || status === 429) return true;
+          if (status >= 500 && status < 600) return true;
+          return false;
+        },
+        onError: (err) => {
+          const status =
+            (err as tus.DetailedError).originalResponse?.getStatus?.() ?? null;
+          const detail = status ? `${status} ${err.message}` : err.message;
+          setError(`Upload failed: ${detail}`);
+          setState("error");
+        },
+        onProgress: (bytesUploaded, bytesTotal) => {
+          if (bytesTotal > 0) {
+            setProgress(Math.round((bytesUploaded / bytesTotal) * 100));
+          }
+        },
+        onSuccess: () => {
           setState("processing");
-          // Redirect to video detail page
           setTimeout(() => {
             window.location.href = `/videos/${videoId}?space=${spaceId}`;
           }, 1500);
-        } else {
-          setError("Upload failed. Please try again.");
-          setState("error");
-        }
-      };
-
-      xhr.onerror = () => {
-        setError("Upload failed. Please try again.");
-        setState("error");
-      };
-
-      xhr.send(file);
+        },
+      });
+      upload.start();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
       setState("error");
