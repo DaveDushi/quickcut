@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback } from "react";
 import * as tus from "tus-js-client";
+import { estimateUploadTime, formatDuration, formatMbps, type UploadEstimate } from "../lib/upload-estimate";
 
 const ALLOWED_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
+const MAX_FILE_SIZE = 30 * 1024 * 1024 * 1024; // 30GB — Cloudflare Stream's per-video cap
 
 type UploadState = "idle" | "selected" | "uploading" | "processing" | "error";
 
@@ -23,6 +24,8 @@ export function UploadForm({ folderId = null, spaces, selectedSpaceId, transcrip
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [estimating, setEstimating] = useState(false);
+  const [estimate, setEstimate] = useState<UploadEstimate | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (f: File): string | null => {
@@ -31,7 +34,7 @@ export function UploadForm({ folderId = null, spaces, selectedSpaceId, transcrip
       return "Unsupported file type. Please upload MP4, MOV, WebM, AVI, or MKV.";
     }
     if (f.size > MAX_FILE_SIZE) {
-      return "File exceeds the 5GB limit.";
+      return "File exceeds the 30GB limit.";
     }
     return null;
   };
@@ -47,6 +50,11 @@ export function UploadForm({ folderId = null, spaces, selectedSpaceId, transcrip
     setTitle(f.name.replace(/\.[^.]+$/, ""));
     setError("");
     setState("selected");
+    setEstimate(null);
+    setEstimating(true);
+    estimateUploadTime(f.size)
+      .then((result) => setEstimate(result))
+      .finally(() => setEstimating(false));
   };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -188,7 +196,7 @@ export function UploadForm({ folderId = null, spaces, selectedSpaceId, transcrip
               <p className="text-lg font-semibold text-text-primary">Drop your video here</p>
               <p className="mt-1 text-sm text-text-tertiary">or click to browse</p>
             </div>
-            <p className="text-xs text-text-tertiary">MP4, MOV, WebM, AVI, MKV up to 5GB</p>
+            <p className="text-xs text-text-tertiary">MP4, MOV, WebM, AVI, MKV up to 30GB</p>
             <input
               ref={fileInputRef}
               type="file"
@@ -218,6 +226,27 @@ export function UploadForm({ folderId = null, spaces, selectedSpaceId, transcrip
               <p className="truncate text-sm font-medium text-text-primary">{file.name}</p>
               <p className="text-xs text-text-tertiary">{formatFileSize(file.size)}</p>
             </div>
+            {state === "selected" && (estimating || estimate) && (
+              <div className="shrink-0 text-right">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary/80">
+                  Est. upload time
+                </p>
+                {estimating ? (
+                  <p className="text-xs text-text-tertiary">estimating…</p>
+                ) : (
+                  estimate && (
+                    <>
+                      <p className="text-sm font-semibold text-text-primary">
+                        ~{formatDuration(estimate.estimatedSeconds)}
+                      </p>
+                      <p className="text-[10px] text-text-tertiary/70">
+                        your connection: {formatMbps(estimate.bytesPerSecond)}
+                      </p>
+                    </>
+                  )
+                )}
+              </div>
+            )}
             {state === "selected" && (
               <button
                 onClick={() => {

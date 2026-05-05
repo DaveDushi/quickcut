@@ -1,8 +1,9 @@
 import { useId, useRef, useState } from "react";
 import { Modal } from "./Modal";
+import { estimateUploadTime, formatDuration, formatMbps, type UploadEstimate } from "../lib/upload-estimate";
 
 const ALLOWED_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024;
+const MAX_FILE_SIZE = 30 * 1024 * 1024 * 1024;
 
 type UploadState = "idle" | "selected" | "uploading" | "processing" | "error";
 
@@ -36,6 +37,8 @@ export function UploadVersionModal({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [estimating, setEstimating] = useState(false);
+  const [estimate, setEstimate] = useState<UploadEstimate | null>(null);
 
   const reset = () => {
     setState("idle");
@@ -46,6 +49,8 @@ export function UploadVersionModal({
     setProgress(0);
     setError("");
     setDragOver(false);
+    setEstimate(null);
+    setEstimating(false);
   };
 
   const close = () => {
@@ -59,7 +64,7 @@ export function UploadVersionModal({
     if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
       return "Unsupported file type. Please upload MP4, MOV, WebM, AVI, or MKV.";
     }
-    if (selectedFile.size > MAX_FILE_SIZE) return "File exceeds the 5GB limit.";
+    if (selectedFile.size > MAX_FILE_SIZE) return "File exceeds the 30GB limit.";
     return null;
   };
 
@@ -73,6 +78,11 @@ export function UploadVersionModal({
     setFile(selectedFile);
     setError("");
     setState("selected");
+    setEstimate(null);
+    setEstimating(true);
+    estimateUploadTime(selectedFile.size)
+      .then((result) => setEstimate(result))
+      .finally(() => setEstimating(false));
   };
 
   const upload = async () => {
@@ -192,9 +202,32 @@ export function UploadVersionModal({
           )}
 
           {file && (
-            <div className="rounded-xl border border-border-default bg-bg-tertiary p-3">
-              <p className="truncate text-sm font-medium text-text-primary">{file.name}</p>
-              <p className="text-xs text-text-tertiary">{formatFileSize(file.size)}</p>
+            <div className="flex items-center gap-3 rounded-xl border border-border-default bg-bg-tertiary p-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-text-primary">{file.name}</p>
+                <p className="text-xs text-text-tertiary">{formatFileSize(file.size)}</p>
+              </div>
+              {state === "selected" && (estimating || estimate) && (
+                <div className="shrink-0 text-right">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary/80">
+                    Est. upload time
+                  </p>
+                  {estimating ? (
+                    <p className="text-xs text-text-tertiary">estimating…</p>
+                  ) : (
+                    estimate && (
+                      <>
+                        <p className="text-sm font-semibold text-text-primary">
+                          ~{formatDuration(estimate.estimatedSeconds)}
+                        </p>
+                        <p className="text-[10px] text-text-tertiary/70">
+                          your connection: {formatMbps(estimate.bytesPerSecond)}
+                        </p>
+                      </>
+                    )
+                  )}
+                </div>
+              )}
             </div>
           )}
 

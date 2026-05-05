@@ -9,7 +9,7 @@ import { isTranscriptGenerationEnabled } from "../../../lib/flags";
 import { getDefaultSpaceForUser, verifySpaceAccess } from "../../../lib/spaces";
 
 const ALLOWED_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
+const MAX_FILE_SIZE = 30 * 1024 * 1024 * 1024; // 30GB — Cloudflare Stream's per-video cap
 
 export const POST: APIRoute = async ({ locals, request }) => {
   if (!locals.user) {
@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
   // Validate file size
   if (fileSize > MAX_FILE_SIZE) {
     return new Response(
-      JSON.stringify({ error: "File exceeds the 5GB limit." }),
+      JSON.stringify({ error: "File exceeds the 30GB limit." }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }

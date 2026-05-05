@@ -39,7 +39,7 @@ export const loginSchema = z.object({
 
 export const uploadSchema = z.object({
   fileName: z.string().min(1, "File name is required"),
-  fileSize: z.number().positive().max(5 * 1024 * 1024 * 1024, "File exceeds 5GB limit"),
+  fileSize: z.number().positive().max(30 * 1024 * 1024 * 1024, "File exceeds 30GB limit"),
   spaceId: z.string().uuid().optional(),
   title: z.string().optional(),
   description: z.string().max(2000).optional(),

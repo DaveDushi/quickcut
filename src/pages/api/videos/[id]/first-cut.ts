@@ -11,7 +11,7 @@ import { broadcastPhaseChange } from "../../../../lib/broadcast";
 import { logProjectActivity } from "../../../../lib/activity";
 
 const ALLOWED_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024;
+const MAX_FILE_SIZE = 30 * 1024 * 1024 * 1024;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -36,7 +36,7 @@ export const POST: APIRoute = async ({ params, locals, request }) => {
   if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
     return json({ error: "Unsupported file type. Please upload MP4, MOV, WebM, AVI, or MKV." }, 400);
   }
-  if (fileSize > MAX_FILE_SIZE) return json({ error: "File exceeds the 5GB limit." }, 400);
+  if (fileSize > MAX_FILE_SIZE) return json({ error: "File exceeds the 30GB limit." }, 400);
 
   const db = createDb(env.DB);
   const projectResult = await db.select().from(videos).where(eq(videos.id, id)).limit(1);

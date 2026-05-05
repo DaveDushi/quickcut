@@ -5,6 +5,18 @@ interface DirectUploadResult {
   streamVideoId: string;
 }
 
+// btoa() only handles Latin1. Filenames from iOS / non-English systems can
+// contain non-Latin1 characters (smart quotes, NBSPs, Hebrew, emoji, etc.),
+// which would throw "InvalidCharacterError". Encode to UTF-8 bytes first.
+function base64Utf8(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
 export async function createDirectUpload(
   accountId: string,
   apiToken: string,
@@ -19,7 +31,7 @@ export async function createDirectUpload(
         Authorization: `Bearer ${apiToken}`,
         "Tus-Resumable": "1.0.0",
         "Upload-Length": String(fileSize),
-        "Upload-Metadata": `name ${btoa(fileName)}`,
+        "Upload-Metadata": `name ${base64Utf8(fileName)}`,
       },
     },
   );

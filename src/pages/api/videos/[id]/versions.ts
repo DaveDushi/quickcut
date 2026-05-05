@@ -9,7 +9,7 @@ import { isTranscriptGenerationEnabled } from "../../../../lib/flags";
 import { verifySpaceAccess } from "../../../../lib/spaces";
 
 const ALLOWED_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024;
+const MAX_FILE_SIZE = 30 * 1024 * 1024 * 1024;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -87,7 +87,7 @@ export const POST: APIRoute = async ({ params, locals, request }) => {
   }
 
   if (fileSize > MAX_FILE_SIZE) {
-    return json({ error: "File exceeds the 5GB limit." }, 400);
+    return json({ error: "File exceeds the 30GB limit." }, 400);
   }
 
   const db = createDb(env.DB);
