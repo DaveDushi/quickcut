@@ -194,7 +194,7 @@ const emptyDescription = currentFolderRecord
   <div class="mx-auto max-w-[1280px] px-4 py-8 sm:px-8">
     <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div>
-        <Breadcrumbs path={folderPath} />
+        <Breadcrumbs path={folderPath} spaceId={selectedSpaceId} />
         <h1 class="text-2xl font-bold text-text-primary">
           {currentFolderRecord ? currentFolderRecord.name : selectedSpace.name}
         </h1>
